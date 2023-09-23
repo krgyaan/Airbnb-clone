@@ -5,11 +5,8 @@ import { useForm } from "react-hook-form";
 import { yupResolver } from '@hookform/resolvers/yup';
 import {
     AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
     AlertDialogContent,
     AlertDialogDescription,
-    AlertDialogFooter,
     AlertDialogHeader,
     AlertDialogTitle,
     AlertDialogTrigger,
@@ -20,15 +17,45 @@ import { Input } from '../ui/input';
 import { Button } from '../ui/button';
 import Image from 'next/image';
 import { registerType, registerSchema } from '@/validation/authSchema';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { useRouter } from 'next/navigation';
 
 const SignupModel = () => {
     const [open, setOpen] = useState<boolean>(false);
-
+    const [loading, setLoading] = useState<boolean>(false);
+    const supabase = createClientComponentClient();
+    const router = useRouter();
     const { register, handleSubmit, formState: { errors } } = useForm<registerType>({
         resolver: yupResolver(registerSchema)
     });
-    const onSubmit = (data: registerType) => {
-        console.log(data)
+    const onSubmit = async (payload: registerType) => {
+        // console.log(payload);
+        setLoading(true);
+        const { data, error } = await supabase.auth.signUp({
+            email: payload.email,
+            password: payload.password,
+            options: {
+                data: {
+                    name: payload.name,
+
+                },
+            },
+        });
+        setLoading(false);
+
+        if (error) {
+            toast.error(error.message, { theme: 'colored' })
+        } else if (data.user) {
+            await supabase.auth.signInWithPassword({
+                email: payload.email,
+                password: payload.password
+            })
+            setOpen(false)
+            router.refresh();
+            toast.success('Account created successfully', { theme: 'colored' })
+        }
     };
 
     return (
@@ -46,47 +73,51 @@ const SignupModel = () => {
                             <X className='cursor-pointer' onClick={() => setOpen(false)} />
                         </div>
                     </AlertDialogTitle>
-                    <AlertDialogDescription>
-                        <form onSubmit={handleSubmit(onSubmit)}>
-                            <h1 className='text-lg font-bold'>
-                                Welcome to Airbnb
-                            </h1>
-                            <div className='mt-5'>
-                                <Label htmlFor='name'>Name</Label>
-                                <Input id='name' placeholder='Enter your Name' {...register('name')} />
-                                <span className='text-red-400'>{errors.name?.message}</span>
-                            </div>
-                            <div className='mt-5'>
-                                <Label htmlFor='email'>Email</Label>
-                                <Input id='email' placeholder='Enter your e-mail' {...register('email')} />
-                                <span className='text-red-400'>{errors.email?.message}</span>
-                            </div>
-                            <div className='mt-5'>
-                                <Label htmlFor='password'>Password</Label>
-                                <Input id='password' placeholder='Enter strong password' {...register('password')} />
-                                <span className='text-red-400'>{errors.password?.message}</span>
-                            </div>
-                            <div className='mt-5'>
-                                <Label htmlFor='cpassword'>Confirm Password</Label>
-                                <Input id='cpassword' placeholder='Repeat password' {...register('passwordConfirm')} />
-                                <span className='text-red-400'>{errors.passwordConfirm?.message}</span>
-                            </div>
-                            <div className='mt-5'>
-                                <Button className='w-full bg-brand'>Continue</Button>
-                            </div>
-                            <div>
-                                <h1 className='text-center font-bold text-xl my-2'>-- or --</h1>
-                            </div>
-
-                            <Button variant='outline' className='w-full'>
-                                <Image src='/images/google.png' alt='google_logo' className='mr-5' height={25} width={25} />
-                                Continue with Google
-                            </Button>
-                            <Button variant='outline' className='w-full mt-5'>
-                                <Image src='/images/github.png' alt='github_logo' className='mr-5' height={25} width={25} />
-                                Continue with GitHub
-                            </Button>
-                        </form>
+                    <AlertDialogDescription asChild>
+                        <div>
+                            <ToastContainer />
+                            <form onSubmit={handleSubmit(onSubmit)}>
+                                <h1 className='text-lg font-bold'>
+                                    Welcome to Airbnb
+                                </h1>
+                                <div className='mt-5'>
+                                    <Label htmlFor='name'>Name</Label>
+                                    <Input id='name' placeholder='Enter your Name' {...register('name')} />
+                                    <span className='text-red-400'>{errors.name?.message}</span>
+                                </div>
+                                <div className='mt-5'>
+                                    <Label htmlFor='email'>Email</Label>
+                                    <Input id='email' placeholder='Enter your e-mail' {...register('email')} />
+                                    <span className='text-red-400'>{errors.email?.message}</span>
+                                </div>
+                                <div className='mt-5'>
+                                    <Label htmlFor='password'>Password</Label>
+                                    <Input id='password' placeholder='Enter strong password' {...register('password')} />
+                                    <span className='text-red-400'>{errors.password?.message}</span>
+                                </div>
+                                <div className='mt-5'>
+                                    <Label htmlFor='cpassword'>Confirm Password</Label>
+                                    <Input id='cpassword' placeholder='Repeat password' {...register('passwordConfirm')} />
+                                    <span className='text-red-400'>{errors.passwordConfirm?.message}</span>
+                                </div>
+                                <div className='mt-5'>
+                                    <Button className='w-full bg-brand' disabled={loading}>
+                                        {loading ? 'Processing..' : 'Continue'}
+                                    </Button>
+                                </div>
+                                <div>
+                                    <h1 className='text-center font-bold text-xl my-2'>-- or --</h1>
+                                </div>
+                                <Button variant='outline' className='w-full'>
+                                    <Image src='/images/google.png' alt='google_logo' className='mr-5' height={25} width={25} />
+                                    Continue with Google
+                                </Button>
+                                <Button variant='outline' className='w-full mt-5'>
+                                    <Image src='/images/github.png' alt='github_logo' className='mr-5' height={25} width={25} />
+                                    Continue with GitHub
+                                </Button>
+                            </form>
+                        </div>
                     </AlertDialogDescription>
                 </AlertDialogHeader>
             </AlertDialogContent>

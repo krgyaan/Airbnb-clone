@@ -8,4 +8,12 @@ export const registerSchema = yup
         passwordConfirm: yup.string().oneOf([yup.ref('password')], 'Comfirm Password Not Matched').required()
     }).required();
 
-export type registerType = yup.InferType<typeof registerSchema>;
+export type registerType = yup.InferType<typeof registerSchema>; // InferType: get type of yup object
+
+export const loginSchema = yup
+    .object({
+        email: yup.string().email().required(),
+        password: yup.string().required().min(6).max(30), 
+    }).required(); 
+
+export type loginType = yup.InferType<typeof loginSchema>; 
