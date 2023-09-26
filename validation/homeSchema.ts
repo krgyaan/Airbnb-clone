@@ -9,7 +9,7 @@ export const homeSchema = yup
         city: yup.string().required('Please enter a city').min(5).max(50),
         price: yup.number().required().typeError('Price must be a number'),
         description: yup.string().required('Please write a description').min(5).max(5000),
-        categotries: yup.mixed<Array<string> | []>()
+        categories: yup.mixed<Array<string> | []>()
             .test('category', 'Please select at least one category', (data: any) => {
                 const isValid = data?.length >= 1;
                 return isValid;
@@ -25,4 +25,4 @@ export const homeSchema = yup
     })
     .required();
 
-export type homeType = yup.InferType<typeof homeSchema>; 
+export type homeSchemaType = yup.InferType<typeof homeSchema>; 
