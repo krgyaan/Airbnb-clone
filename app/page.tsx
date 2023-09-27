@@ -5,12 +5,15 @@ import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
 import { cookies } from "next/headers";
 import HomeCard from "@/components/common/HomeCard";
 
-export default async function Home() {
+export default async function Home({ searchParams }: { searchParams?: { [key: string]: string | undefined } }) {
   const supabase = createServerComponentClient({ cookies });
-  const { data: homes, error } = await supabase
+  const query = supabase
     .from('homes')
     .select('id, title, city, image, price, country, users(metadata -> name)');
-
+  if (searchParams?.location) {
+    query.ilike("location", `%${searchParams?.location}%`)
+  }
+  const { data:homes } = query
   // console.log(homes)
   return (
     <div>
