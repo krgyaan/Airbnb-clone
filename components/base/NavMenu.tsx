@@ -31,7 +31,7 @@ const NavMenu = ({ session }: { session: object | undefined }) => {
                             <SignOut />
                             <li className="hover:bg-slate-200 rounded-md p-2 cursor-pointer">
                                 <Link href="/addhome" >
-                                    Add you home
+                                    Add homes
                                 </Link>
                             </li>
                         </>
@@ -41,7 +41,7 @@ const NavMenu = ({ session }: { session: object | undefined }) => {
                             <SignupModel />
                             <li className="hover:bg-slate-200 rounded-md p-2 cursor-pointer">
                                 <Link href="/addhome" >
-                                    Add you home
+                                    Add homes
                                 </Link>
                             </li>
                         </>

@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import {
   Sheet,
   SheetContent,
@@ -14,19 +14,24 @@ import MobileNav from '@/components/base/MobileNav'
 import SearchSheetNav from '../base/SearchSheetNav'
 import DatePicker from './DatePicker'
 import { Button } from '../ui/button'
-import { addDays, format } from 'date-fns'
-import { useRouter } from 'next/navigation'
+import { addDays, differenceInDays, format, parse } from 'date-fns'
+import { useRouter, useSearchParams } from 'next/navigation'
 
 
 const SearchSheet = ({ session }: { session: any }) => {
   const [show, setShow] = useState(false)
-  const [search, setSearch] = useState<string>();
+  const [search, setSearch] = useState<string>("");
   const router = useRouter();
+  const params = useSearchParams();
+  const [searchParams, setSearchParams] = useState({
+    country: "",
+    days: ""
+  })
 
   const [state, setState] = useState([
     {
       startDate: new Date(),
-      endDate: addDays(new Date(), 7),
+      endDate: addDays(new Date(), 2),
       key: 'selection'
     },
   ])
@@ -35,29 +40,49 @@ const SearchSheet = ({ session }: { session: any }) => {
     setState([ranges?.selection])
   }
 
+  useEffect(() => {
+    const difference = differenceInDays(
+      parse(params?.get("endDate")!, "dd-MM-y", new Date()),
+      parse(params?.get("startDate")!, "dd-MM-y", new Date())
+    );
+    if (difference) {
+      setSearchParams({
+        ...searchParams,
+        days: `${difference} days`,
+        country: params?.get("country") ? params?.get("country")! : "Anywhere",
+      });
+    }
+  }, [params]);
+
   const handleSubmit = () => {
     const startDate = format(state[0].startDate, 'dd-MM-y')
     const endDate = format(state[0].endDate, 'dd-MM-y')
 
-    router.replace(`/?location=${search}&startDate=${startDate}&endDate=${endDate}`)
+    router.replace(`/?country=${search}&startDate=${startDate}&endDate=${endDate}`)
     setShow(false)
   }
 
   return (
     <Sheet open={show}>
-      <SheetTrigger>
+      <SheetTrigger asChild>
         <div className='w-full md:w-auto cursor-pointer' onClick={() => setShow(true)}>
           <div className='hidden md:flex items-center space-x-2 border p-2 rounded-3xl'>
-            <span className='text-sm pl-2'>Anywhere</span>
+            <span className='text-sm pl-2'>
+              {searchParams.country != "" ? searchParams.country : "Anywhere"}
+            </span>
             <span>|</span>
-            <span className='text-sm'>Any week</span>
+            <span className='text-sm'>
+              {searchParams.days != "" ? searchParams.days : "Any week"}
+            </span>
             <span>|</span>
             <span className='text-sm text-gray-400'>Add guest</span>
             <span className='bg-brand text-white p-2 rounded-full'>
               <Search height={17} width={17} />
             </span>
           </div>
-          <MobileNav />
+          <div className=''>
+            <MobileNav />
+          </div>
         </div>
       </SheetTrigger>
       <SheetContent side='top'>

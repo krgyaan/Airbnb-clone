@@ -7,7 +7,7 @@ import Link from 'next/link'
 const SearchSheetNav = ({ session, searchInputCallback }: { session: any, searchInputCallback: (value: string) => void }) => {
     return (
         <div className='flex items-center justify-between'>
-            <div>
+            <div className='hidden md:block'>
                 <Logo />
             </div>
             <Input
@@ -18,7 +18,7 @@ const SearchSheetNav = ({ session, searchInputCallback }: { session: any, search
             />
             <div className='hidden md:flex items-center space-x-4'>
                 <Link href="/addhome" className="text-sm font-semibold">
-                    Add you home
+                    Add homes
                 </Link>
                 <NavMenu session={session} />
             </div>

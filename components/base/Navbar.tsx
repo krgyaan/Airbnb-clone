@@ -10,14 +10,16 @@ const Navbar = async () => {
     const { data, error } = await supabase.auth.getSession();
     // console.log("The Sessiion: ", data)
     return (
-        <div className='flex items-center justify-between px-10 border-b-[1px]'>
+        <div className='flex items-center justify-between md:px-10 border-b-[1px]'>
             <div className='hidden md:block'>
                 <Logo />
             </div>
-            <SearchSheet session={data?.session?.user} />
+            <div className='w-full md:w-auto'>
+                <SearchSheet session={data?.session?.user} />
+            </div>
             <div className='hidden md:flex items-center space-x-4'>
                 <Link href="/addhome" className="text-sm font-semibold">
-                    Add you home
+                    Add homes
                 </Link>
                 <NavMenu session={data?.session?.user} />
             </div>
